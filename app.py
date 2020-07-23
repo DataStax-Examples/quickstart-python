@@ -19,7 +19,7 @@ HOST_ADDRESS = "127.0.0.1"
 def create_cluster():
     cluster = Cluster([HOST_ADDRESS])
     session = cluster.connect()
-    return (cluster, session)
+    return cluster, session
 
 
 def create_keyspace(session):
@@ -73,7 +73,7 @@ def create_titles_by_rating(session):
 
 def prepare_inserts_primary(session):
 
-    insert = "INSERT INTO %s " % (TABLE_NETFLIX_PRIMARY)
+    insert = "INSERT INTO %s " % TABLE_NETFLIX_PRIMARY
     query = insert + \
         "(title, show_id, cast, country, date_added, description, director, duration, listed_in, rating, release_year, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 
@@ -82,7 +82,7 @@ def prepare_inserts_primary(session):
 
 
 def prepare_inserts_date(session):
-    insert = "INSERT INTO %s " % (TABLE_NETFLIX_TITLES_BY_DATE)
+    insert = "INSERT INTO %s " % TABLE_NETFLIX_TITLES_BY_DATE
     query = insert + \
         "(show_id, date_added, release_year, title, type) VALUES(?, ?, ?, ?, ?)"
     print "Preparing: %s " % query
@@ -90,7 +90,7 @@ def prepare_inserts_date(session):
 
 
 def prepare_inserts_rating(session):
-    insert = "INSERT INTO %s " % (TABLE_NETFLIX_TITLES_BY_RATING)
+    insert = "INSERT INTO %s " % TABLE_NETFLIX_TITLES_BY_RATING
     query = insert + \
         "(show_id, rating, title) VALUES (?,?,?)"
     print "Preparing: %s " % query
@@ -106,14 +106,14 @@ def prepare_reads_all_by_title_primary(session):
 
 
 def prepare_reads_director_by_title_primary(session):
-    select_director = "SELECT director FROM %s " % (TABLE_NETFLIX_PRIMARY)
+    select_director = "SELECT director FROM %s " % TABLE_NETFLIX_PRIMARY
     query = select_director + "WHERE title = ?"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_update_director(session):
-    update_director = "UPDATE %s " % (TABLE_NETFLIX_PRIMARY)
+    update_director = "UPDATE %s " % TABLE_NETFLIX_PRIMARY
     query = update_director + \
         "SET director = ? WHERE show_id = ? AND title = ?"
     print "Preparing: %s " % query
@@ -153,11 +153,11 @@ def insert_primary_records(session, preparedInsertPrimary):
                   1994,
                   'Movie']
 
-    print "Inserting into Primary Table for title: %s " % (TITLE_LIFE_OF_JIMMY)
-    session.execute(preparedInsertPrimary, (params_jimmy))
+    print "Inserting into Primary Table for title: %s " % TITLE_LIFE_OF_JIMMY
+    session.execute(preparedInsertPrimary, params_jimmy)
 
-    print "Inserting into Primary Table for title: %s " % (TITLE_PULP_FICTION)
-    session.execute(preparedInsertPrimary, (paramsPulp))
+    print "Inserting into Primary Table for title: %s " % TITLE_PULP_FICTION
+    session.execute(preparedInsertPrimary, paramsPulp)
 
 
 def insert_titles_by_date_records(session, preparedInsertDate):
@@ -211,8 +211,8 @@ def insert_titles_by_rating_records(session, preparedInsertRating):
 
 def read_all(session, tableName):
 
-    query = "SELECT * FROM %s " % (tableName)
-    print "Selecting all from Table: %s" % (tableName)
+    query = "SELECT * FROM %s " % tableName
+    print "Selecting all from Table: %s" % tableName
     query = session.prepare(query)
     return session.execute(query)
 
@@ -220,7 +220,7 @@ def read_all(session, tableName):
 def read_all_primary_by_title(session, titleName, prepared_read_by_title_primary):
     params_select = [titleName]
 
-    print "Select all from Primary table with Title: %s" % (titleName)
+    print "Select all from Primary table with Title: %s" % titleName
     return session.execute(prepared_read_by_title_primary, params_select)
 
 
