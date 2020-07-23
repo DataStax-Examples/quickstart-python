@@ -251,69 +251,70 @@ def main():
         print "Connection to cluster - step 1"
         (cluster, session) = create_cluster()
 
-        print ""
-        print "Creating keyspace - step 2"
+        try:
+            print ""
+            print "Creating keyspace - step 2"
 
-        create_keyspace(session)
+            create_keyspace(session)
 
-        print ""
-        print "Creating tables - step 3"
+            print ""
+            print "Creating tables - step 3"
 
-        create_primary(session)
-        create_titles_by_date(session)
-        create_titles_by_rating(session)
+            create_primary(session)
+            create_titles_by_date(session)
+            create_titles_by_rating(session)
 
-        print ""
-        print "Creating prepared statements - step 4"
-        prepared_insert_primary = prepare_inserts_primary(session)
-        prepared_insert_date = prepare_inserts_date(session)
-        prepared_insert_rating = prepare_inserts_rating(session)
-        prepared_read_director_by_title_primary = prepare_reads_director_by_title_primary(
-            session)
-        prepared_read_all_by_title_primary = prepare_reads_all_by_title_primary(
-            session)
-        prepared_update_director = prepare_update_director(session)
+            print ""
+            print "Creating prepared statements - step 4"
+            prepared_insert_primary = prepare_inserts_primary(session)
+            prepared_insert_date = prepare_inserts_date(session)
+            prepared_insert_rating = prepare_inserts_rating(session)
+            prepared_read_director_by_title_primary = prepare_reads_director_by_title_primary(
+                session)
+            prepared_read_all_by_title_primary = prepare_reads_all_by_title_primary(
+                session)
+            prepared_update_director = prepare_update_director(session)
 
-        print ""
-        print "Inserting records - step 5"
-        insert_primary_records(session, prepared_insert_primary)
-        insert_titles_by_date_records(session, prepared_insert_date)
-        insert_titles_by_rating_records(session, prepared_insert_rating)
+            print ""
+            print "Inserting records - step 5"
+            insert_primary_records(session, prepared_insert_primary)
+            insert_titles_by_date_records(session, prepared_insert_date)
+            insert_titles_by_rating_records(session, prepared_insert_rating)
 
-        print ""
-        print "Reading records - step 6"
-        print_all(read_all(session, TABLE_NETFLIX_PRIMARY))
-        print ""
-        print_all(read_all(session, TABLE_NETFLIX_TITLES_BY_RATING))
-        print ""
-        print_all(read_all(session, TABLE_NETFLIX_TITLES_BY_DATE))
-        print ""
-        print_all(read_all_primary_by_title(
-            session, TITLE_PULP_FICTION, prepared_read_all_by_title_primary))
-        print ""
-        print_all(read_director_from_primary_by_title(
-            session, TITLE_PULP_FICTION, prepared_read_director_by_title_primary))
+            print ""
+            print "Reading records - step 6"
+            print_all(read_all(session, TABLE_NETFLIX_PRIMARY))
+            print ""
+            print_all(read_all(session, TABLE_NETFLIX_TITLES_BY_RATING))
+            print ""
+            print_all(read_all(session, TABLE_NETFLIX_TITLES_BY_DATE))
+            print ""
+            print_all(read_all_primary_by_title(
+                session, TITLE_PULP_FICTION, prepared_read_all_by_title_primary))
+            print ""
+            print_all(read_director_from_primary_by_title(
+                session, TITLE_PULP_FICTION, prepared_read_director_by_title_primary))
 
-        print ""
-        print "Updating record with read - step 7"
-        update_director_in_primary_by_title(session, SHOW_ID_PULP_FICTION,
-                                            TITLE_PULP_FICTION,
-                                            ['Quentin Jerome Tarantino'], prepared_update_director)
+            print ""
+            print "Updating record with read - step 7"
+            update_director_in_primary_by_title(session, SHOW_ID_PULP_FICTION,
+                                                TITLE_PULP_FICTION,
+                                                ['Quentin Jerome Tarantino'], prepared_update_director)
 
-        print ""
-        print_all(read_director_from_primary_by_title(
-            session, TITLE_PULP_FICTION, prepared_read_director_by_title_primary))
+            print ""
+            print_all(read_director_from_primary_by_title(
+                session, TITLE_PULP_FICTION, prepared_read_director_by_title_primary))
 
+        finally:
+            print "Disconnecting from cluster - step 8"
+            try:
+                cluster.shutdown()
+                time.sleep(2)
+            except Exception as shutdownException:
+                print ("Error during shutdown: ", shutdownException)
     except Exception as ex:
         print "Something failed during Python Netflix experience"
         print("Error: ", ex)
-    finally:
-        print "Disconnecting from cluster - step 8"
-        try:
-            cluster.shutdown()
-            time.sleep(2)
-        except Exception as shutdownException:
-            print ("Error during shutdown: ", shutdownException)
 
 
 if __name__ == "__main__":
