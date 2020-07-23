@@ -1,7 +1,7 @@
-from cassandra.cluster import Cluster
-
 import datetime
 import time
+
+from cassandra.cluster import Cluster
 
 TABLE_NETFLIX_PRIMARY = "netflix_master"
 TABLE_NETFLIX_TITLES_BY_DATE = "netflix_titles_by_date"
@@ -18,8 +18,13 @@ HOST_ADDRESS = "127.0.0.1"
 
 def create_cluster():
     cluster = Cluster([HOST_ADDRESS])
-    session = cluster.connect(KEYSPACE_NAME)
+    session = cluster.connect()
     return (cluster, session)
+
+
+def create_keyspace(session):
+    session.execute("CREATE KEYSPACE IF NOT EXISTS " + KEYSPACE_NAME + " WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};	")
+    session.set_keyspace(KEYSPACE_NAME)
 
 
 def create_primary(session):
@@ -247,7 +252,19 @@ def main():
         (cluster, session) = create_cluster()
 
         print ""
-        print "Creating prepared statements - step 2"
+        print "Creating keyspace - step 2"
+
+        create_keyspace(session)
+
+        print ""
+        print "Creating tables - step 3"
+
+        create_primary(session)
+        create_titles_by_date(session)
+        create_titles_by_rating(session)
+
+        print ""
+        print "Creating prepared statements - step 4"
         prepared_insert_primary = prepare_inserts_primary(session)
         prepared_insert_date = prepare_inserts_date(session)
         prepared_insert_rating = prepare_inserts_rating(session)
@@ -258,20 +275,13 @@ def main():
         prepared_update_director = prepare_update_director(session)
 
         print ""
-        print "Creating tables - step 3"
-
-        create_primary(session)
-        create_titles_by_date(session)
-        create_titles_by_rating(session)
-
-        print ""
-        print "Inserting records - step 4"
+        print "Inserting records - step 5"
         insert_primary_records(session, prepared_insert_primary)
         insert_titles_by_date_records(session, prepared_insert_date)
         insert_titles_by_rating_records(session, prepared_insert_rating)
 
         print ""
-        print "Reading records - step 5"
+        print "Reading records - step 6"
         print_all(read_all(session, TABLE_NETFLIX_PRIMARY))
         print ""
         print_all(read_all(session, TABLE_NETFLIX_TITLES_BY_RATING))
@@ -285,7 +295,7 @@ def main():
             session, TITLE_PULP_FICTION, prepared_read_director_by_title_primary))
 
         print ""
-        print "Updating record with read - step 6"
+        print "Updating record with read - step 7"
         update_director_in_primary_by_title(session, SHOW_ID_PULP_FICTION,
                                             TITLE_PULP_FICTION,
                                             ['Quentin Jerome Tarantino'], prepared_update_director)
@@ -296,14 +306,14 @@ def main():
 
     except Exception as ex:
         print "Something failed during Python Netflix experience"
-        print("Error: ", ex.message)
+        print("Error: ", ex)
     finally:
-        print "Shutting down cluster - step 7"
+        print "Disconnecting from cluster - step 8"
         try:
             cluster.shutdown()
             time.sleep(2)
         except Exception as shutdownException:
-            print ("Error during shutdown: ", shutdownException.message)
+            print ("Error during shutdown: ", shutdownException)
 
 
 if __name__ == "__main__":
