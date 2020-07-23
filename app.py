@@ -73,8 +73,7 @@ def create_titles_by_rating(session):
 
 def prepare_inserts_primary(session):
 
-    insert = "INSERT INTO %s " % TABLE_NETFLIX_PRIMARY
-    query = insert + \
+    query = "INSERT INTO %s " % TABLE_NETFLIX_PRIMARY + \
         "(title, show_id, cast, country, date_added, description, director, duration, listed_in, rating, release_year, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 
     print "Preparing: %s " % query
@@ -82,39 +81,33 @@ def prepare_inserts_primary(session):
 
 
 def prepare_inserts_date(session):
-    insert = "INSERT INTO %s " % TABLE_NETFLIX_TITLES_BY_DATE
-    query = insert + \
+    query = "INSERT INTO %s " % TABLE_NETFLIX_TITLES_BY_DATE + \
         "(show_id, date_added, release_year, title, type) VALUES(?, ?, ?, ?, ?)"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_inserts_rating(session):
-    insert = "INSERT INTO %s " % TABLE_NETFLIX_TITLES_BY_RATING
-    query = insert + \
+    query = "INSERT INTO %s " % TABLE_NETFLIX_TITLES_BY_RATING + \
         "(show_id, rating, title) VALUES (?,?,?)"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_reads_all_by_title_primary(session):
-    select = "SELECT * FROM %s " % (
-        TABLE_NETFLIX_PRIMARY)
-    query = select + "WHERE title = ?"
+    query = "SELECT * FROM %s " % TABLE_NETFLIX_PRIMARY + "WHERE title = ?"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_reads_director_by_title_primary(session):
-    select_director = "SELECT director FROM %s " % TABLE_NETFLIX_PRIMARY
-    query = select_director + "WHERE title = ?"
+    query = "SELECT director FROM %s " % TABLE_NETFLIX_PRIMARY + "WHERE title = ?"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_update_director(session):
-    update_director = "UPDATE %s " % TABLE_NETFLIX_PRIMARY
-    query = update_director + \
+    query = "UPDATE %s " % TABLE_NETFLIX_PRIMARY + \
         "SET director = ? WHERE show_id = ? AND title = ?"
     print "Preparing: %s " % query
     return session.prepare(query)
@@ -122,12 +115,11 @@ def prepare_update_director(session):
 
 def insert_primary_records(session, prepared_insert_primary):
 
-    life_of_jimmy_date_added = datetime.date(2020, 6, 1)
     params_jimmy = [TITLE_LIFE_OF_JIMMY,
                     SHOW_ID_LIFE_OF_JIMMY,
                     ['Jimmy'],
                     ['United States'],
-                    life_of_jimmy_date_added,
+                    datetime.date(2020, 6, 1),
                     'Experiences of a guitar playing DataStax developer',
                     ['Franky J'],
                     '42 min',
@@ -136,7 +128,6 @@ def insert_primary_records(session, prepared_insert_primary):
                     2020,
                     'Movie']
 
-    pulp_fiction_date_added = datetime.date(2019, 1, 19)
     params_pulp = [TITLE_PULP_FICTION,
                   SHOW_ID_PULP_FICTION,
                   ['John Travolta', 'Samuel L. Jackson',
@@ -144,7 +135,7 @@ def insert_primary_records(session, prepared_insert_primary):
                    'Ving Rhames', 'Eric Stoltz', 'Rosanna Arquette', 'Christopher Walken',
                    'Bruce Willis'],
                   ['United States'],
-                  pulp_fiction_date_added,
+                   datetime.date(2019, 1, 19),
                   'This stylized crime caper weaves together stories ...',
                   ['Quentin Tarantino'],
                   '42 min',
