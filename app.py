@@ -29,7 +29,7 @@ def create_keyspace(session):
 
 def create_primary(session):
 
-    create_primary = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_PRIMARY + " \
+    statement = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_PRIMARY + " \
         (show_id int, \
         cast list<text>, \
         country list<text>, \
@@ -41,12 +41,12 @@ def create_primary(session):
         PRIMARY KEY((title), show_id))"
 
     print 'Creating Primary Table'
-    return session.execute(create_primary)
+    return session.execute(statement)
 
 
 def create_titles_by_date(session):
 
-    create_titles_by_date = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_TITLES_BY_DATE + " \
+    statement = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_TITLES_BY_DATE + " \
         (show_id int, \
         date_added date, \
         release_year int, \
@@ -56,19 +56,19 @@ def create_titles_by_date(session):
         WITH CLUSTERING ORDER BY (date_added DESC)"
 
     print 'Creating Titles By Date Table'
-    return session.execute(create_titles_by_date)
+    return session.execute(statement)
 
 
 def create_titles_by_rating(session):
 
-    create_titles_by_rating = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_TITLES_BY_RATING + " \
+    statement = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_TITLES_BY_RATING + " \
         (show_id int, \
         rating text, \
         title text, \
         PRIMARY KEY((rating), show_id))"
 
     print "Creating Titles By Rating Table"
-    return session.execute(create_titles_by_rating)
+    return session.execute(statement)
 
 
 def prepare_inserts_primary(session):
@@ -120,7 +120,7 @@ def prepare_update_director(session):
     return session.prepare(query)
 
 
-def insert_primary_records(session, preparedInsertPrimary):
+def insert_primary_records(session, prepared_insert_primary):
 
     life_of_jimmy_date_added = datetime.date(2020, 6, 1)
     params_jimmy = [TITLE_LIFE_OF_JIMMY,
@@ -137,7 +137,7 @@ def insert_primary_records(session, preparedInsertPrimary):
                     'Movie']
 
     pulp_fiction_date_added = datetime.date(2019, 1, 19)
-    paramsPulp = [TITLE_PULP_FICTION,
+    params_pulp = [TITLE_PULP_FICTION,
                   SHOW_ID_PULP_FICTION,
                   ['John Travolta', 'Samuel L. Jackson',
                    'Uma Thurman', 'Harvey Keitel', 'Tim Roth', 'Amanda Plummer', 'Maria de Medeiros',
@@ -154,13 +154,13 @@ def insert_primary_records(session, preparedInsertPrimary):
                   'Movie']
 
     print "Inserting into Primary Table for title: %s " % TITLE_LIFE_OF_JIMMY
-    session.execute(preparedInsertPrimary, params_jimmy)
+    session.execute(prepared_insert_primary, params_jimmy)
 
     print "Inserting into Primary Table for title: %s " % TITLE_PULP_FICTION
-    session.execute(preparedInsertPrimary, paramsPulp)
+    session.execute(prepared_insert_primary, params_pulp)
 
 
-def insert_titles_by_date_records(session, preparedInsertDate):
+def insert_titles_by_date_records(session, prepared_insert_date):
 
     params_jimmy = [
         SHOW_ID_LIFE_OF_JIMMY,
@@ -180,14 +180,14 @@ def insert_titles_by_date_records(session, preparedInsertDate):
 
     print "Inserting into TitlesByDate Table for title: %s" % (
         TITLE_LIFE_OF_JIMMY)
-    session.execute(preparedInsertDate, params_jimmy)
+    session.execute(prepared_insert_date, params_jimmy)
 
     print "Inserting into TitlesByDate Table for title: %s" % (
         TITLE_PULP_FICTION)
-    session.execute(preparedInsertDate, params_pulp)
+    session.execute(prepared_insert_date, params_pulp)
 
 
-def insert_titles_by_rating_records(session, preparedInsertRating):
+def insert_titles_by_rating_records(session, prepared_insert_rating):
 
     params_jimmy = [
         SHOW_ID_LIFE_OF_JIMMY,
@@ -202,42 +202,42 @@ def insert_titles_by_rating_records(session, preparedInsertRating):
     ]
     print "Inserting into TitlesByRating Table for title: %s " % (
         TITLE_LIFE_OF_JIMMY)
-    session.execute(preparedInsertRating, params_jimmy)
+    session.execute(prepared_insert_rating, params_jimmy)
 
     print "Inserting into TitlesByRating Table for title: %s " % (
         TITLE_PULP_FICTION)
-    session.execute(preparedInsertRating, params_pulp)
+    session.execute(prepared_insert_rating, params_pulp)
 
 
-def read_all(session, tableName):
+def read_all(session, table_name):
 
-    query = "SELECT * FROM %s " % tableName
-    print "Selecting all from Table: %s" % tableName
+    query = "SELECT * FROM %s " % table_name
+    print "Selecting all from Table: %s" % table_name
     query = session.prepare(query)
     return session.execute(query)
 
 
-def read_all_primary_by_title(session, titleName, prepared_read_by_title_primary):
-    params_select = [titleName]
+def read_all_primary_by_title(session, title_name, prepared_read_by_title_primary):
+    params_select = [title_name]
 
-    print "Select all from Primary table with Title: %s" % titleName
+    print "Select all from Primary table with Title: %s" % title_name
     return session.execute(prepared_read_by_title_primary, params_select)
 
 
-def read_director_from_primary_by_title(session, titleName, prepared_read_director_primary):
+def read_director_from_primary_by_title(session, title_name, prepared_read_director_primary):
 
-    params_select = [titleName]
+    params_select = [title_name]
     print "Selecting director from Primary table with Title: %s: " % (
-        titleName)
+        title_name)
     return session.execute(prepared_read_director_primary, params_select)
 
 
-def update_director_in_primary_by_title(session, showId, titleName, directorList, prepare_update_director):
+def update_director_in_primary_by_title(session, show_id, title_name, director_list, prepared_update_director):
 
-    params_update = [directorList, showId, titleName]
+    params_update = [director_list, show_id, title_name]
     print "Updating director list by Title: %s and Show ID: %s" % (
-        titleName, showId)
-    return session.execute(prepare_update_director, params_update)
+        title_name, show_id)
+    return session.execute(prepared_update_director, params_update)
 
 
 def print_all(result_set):
@@ -310,8 +310,8 @@ def main():
             try:
                 cluster.shutdown()
                 time.sleep(2)
-            except Exception as shutdownException:
-                print ("Error during shutdown: ", shutdownException)
+            except Exception as shutdown_exception:
+                print ("Error during shutdown: ", shutdown_exception)
     except Exception as ex:
         print "Something failed during Python Netflix experience"
         print("Error: ", ex)
