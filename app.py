@@ -23,14 +23,15 @@ def create_cluster():
 
 
 def create_keyspace(session):
-    session.execute("CREATE KEYSPACE IF NOT EXISTS " + KEYSPACE_NAME + " WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};	")
+    session.execute("CREATE KEYSPACE IF NOT EXISTS %s " % KEYSPACE_NAME +
+                    "WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};	")
     session.set_keyspace(KEYSPACE_NAME)
 
 
 def create_primary(session):
 
-    statement = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_PRIMARY + " \
-        (show_id int, \
+    statement = "CREATE TABLE IF NOT EXISTS %s " % TABLE_NETFLIX_PRIMARY + \
+        "(show_id int, \
         cast list<text>, \
         country list<text>, \
         date_added date, \
@@ -46,8 +47,8 @@ def create_primary(session):
 
 def create_titles_by_date(session):
 
-    statement = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_TITLES_BY_DATE + " \
-        (show_id int, \
+    statement = "CREATE TABLE IF NOT EXISTS %s " % TABLE_NETFLIX_TITLES_BY_DATE + \
+        "(show_id int, \
         date_added date, \
         release_year int, \
         title text, \
@@ -61,8 +62,8 @@ def create_titles_by_date(session):
 
 def create_titles_by_rating(session):
 
-    statement = "CREATE TABLE IF NOT EXISTS " + TABLE_NETFLIX_TITLES_BY_RATING + " \
-        (show_id int, \
+    statement = "CREATE TABLE IF NOT EXISTS %s " % TABLE_NETFLIX_TITLES_BY_RATING + \
+        "(show_id int, \
         rating text, \
         title text, \
         PRIMARY KEY((rating), show_id))"
@@ -74,7 +75,8 @@ def create_titles_by_rating(session):
 def prepare_inserts_primary(session):
 
     query = "INSERT INTO %s " % TABLE_NETFLIX_PRIMARY + \
-        "(title, show_id, cast, country, date_added, description, director, duration, listed_in, rating, release_year, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+        "(title, show_id, cast, country, date_added, description, director, duration, listed_in, rating, release_year, type) " \
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 
     print "Preparing: %s " % query
     return session.prepare(query)
@@ -82,33 +84,40 @@ def prepare_inserts_primary(session):
 
 def prepare_inserts_date(session):
     query = "INSERT INTO %s " % TABLE_NETFLIX_TITLES_BY_DATE + \
-        "(show_id, date_added, release_year, title, type) VALUES(?, ?, ?, ?, ?)"
+        "(show_id, date_added, release_year, title, type) " \
+        "VALUES(?, ?, ?, ?, ?)"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_inserts_rating(session):
     query = "INSERT INTO %s " % TABLE_NETFLIX_TITLES_BY_RATING + \
-        "(show_id, rating, title) VALUES (?,?,?)"
+        "(show_id, rating, title) " \
+        "VALUES (?,?,?)"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_reads_all_by_title_primary(session):
-    query = "SELECT * FROM %s " % TABLE_NETFLIX_PRIMARY + "WHERE title = ?"
+    query = "SELECT * " \
+            "FROM %s " % TABLE_NETFLIX_PRIMARY + \
+            "WHERE title = ?"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_reads_director_by_title_primary(session):
-    query = "SELECT director FROM %s " % TABLE_NETFLIX_PRIMARY + "WHERE title = ?"
+    query = "SELECT director " \
+            "FROM %s " % TABLE_NETFLIX_PRIMARY + \
+            "WHERE title = ?"
     print "Preparing: %s " % query
     return session.prepare(query)
 
 
 def prepare_update_director(session):
     query = "UPDATE %s " % TABLE_NETFLIX_PRIMARY + \
-        "SET director = ? WHERE show_id = ? AND title = ?"
+        "SET director = ? " \
+        "WHERE show_id = ? AND title = ?"
     print "Preparing: %s " % query
     return session.prepare(query)
 
